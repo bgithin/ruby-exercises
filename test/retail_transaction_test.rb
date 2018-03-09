@@ -149,6 +149,30 @@ describe RetailTransaction do
       tx.payment_authorized!
     end
 
+    it "refund" do
+      tx.refund!
+      assert_equal true, tx.refunded?
+    end
+
+    it "cannot be reopened" do
+      assert_invalid_transition { tx.reopen! }
+    end
+  end
+
+  describe "already refunded" do
+    before(:each) do
+      tx.add_item("bobcat")
+      tx.check_out!
+      tx.payment_info = "15 cents and a nail"
+      tx.process_payment!
+      tx.payment_authorized!
+      tx.refund!
+    end
+
+    it "cannot refund again" do
+      assert_invalid_transition { tx.refund! }
+    end
+
     it "cannot be reopened" do
       assert_invalid_transition { tx.reopen! }
     end
